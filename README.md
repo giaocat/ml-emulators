@@ -64,14 +64,15 @@ modules/gb6d/build/gb.mo
 modules/nes6d/build/nes.mo
 ```
 
-## Binaries
+## License
 
-| File | Size | SHA-256 |
-| --- | --- | --- |
-| `gb/gb.mo` | 107,196 | `984F3E6093F9C00F4A8FD71FB73B9290CBEE48271488E5FE2BF566F66B0B0B4A` |
-| `nes/nes.mo` | 441,608 | `2B3A4B28F68F38BEF219018BEF2E763E5DA629E465BD5F805512CE8F5B708E0B` |
+This project is licensed under the GNU General Public License v2.0; see
+[LICENSE](LICENSE).
 
-Both were validated against the 6D.116 symbol table with 0 missing imports.
+Third-party components:
+
+- Walnut-CGB and minigb_apu: MIT (`gb/LICENSE-Walnut-CGB`, `gb/LICENSE-minigb-apu`)
+- QuickNES: GPL-2.0 (`nes/LICENSE-QuickNES`)
 
 ## Notes
 
