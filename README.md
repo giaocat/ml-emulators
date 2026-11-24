@@ -69,7 +69,7 @@ modules/nes6d/build/nes.mo
 | File | Size | SHA-256 |
 | --- | --- | --- |
 | `gb/gb.mo` | 107,196 | `984F3E6093F9C00F4A8FD71FB73B9290CBEE48271488E5FE2BF566F66B0B0B4A` |
-| `nes/nes.mo` | 441,600 | `5EEAC27FFD1BE104F4A9BD00C850B84440D154825DB294A0EDA30C6F5B9958C0` |
+| `nes/nes.mo` | 441,608 | `2B3A4B28F68F38BEF219018BEF2E763E5DA629E465BD5F805512CE8F5B708E0B` |
 
 Both were validated against the 6D.116 symbol table with 0 missing imports.
 
@@ -79,5 +79,6 @@ Both were validated against the 6D.116 symbol table with 0 missing imports.
 - NES uses QuickNES 0.7 (GPL-2.0).
 - Rendering is intentionally Direct only; Double/Flip buffer modes were removed after 6D bring-up.
 - These are homebrew/porting projects; use ROMs you legally own.
+
 
 

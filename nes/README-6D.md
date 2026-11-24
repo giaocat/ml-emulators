@@ -68,13 +68,13 @@ ML/NES/*.nes
 ## 已构建的产物
 
 ```text
-build/nes.mo   441600 bytes
+build/nes.mo   441608 bytes
 build/nes.dep  682 bytes
 build/nes.sym  24869 bytes
 ```
 
 - 工具链：xPack GNU Arm Embedded GCC 15.2.1
-- `nes.mo` SHA-256：`5EEAC27FFD1BE104F4A9BD00C850B84440D154825DB294A0EDA30C6F5B9958C0`
+- `nes.mo` SHA-256：`2B3A4B28F68F38BEF219018BEF2E763E5DA629E465BD5F805512CE8F5B708E0B`
 - `nes.dep` 共 45 个未解析符号，在 6D.116 的 `6D_116.sym` 中全部找到（0 missing）
 - 已确认编译进 6D 分支：`nes6d: NES menu registered (6D keymap)` 字符串
 - QuickNES 的 Blip_Buffer 均衡器需要 `libm`；链接时已把 `libm`/`libgcc` 静态链进模块，不依赖相机导出 `cos/exp/pow`
@@ -123,6 +123,7 @@ build/nes.sym  24869 bytes
 ## 许可
 
 上游项目与 GPL-2.0 兼容；Doom/NES 商业 ROM 不随本项目分发。
+
 
 
 
