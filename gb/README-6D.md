@@ -88,13 +88,13 @@ modules/gb6d/build/gb.mo
 ## 已构建产物
 
 ```text
-build/gb.mo   107196 bytes
+build/gb.mo   102960 bytes
 build/gb.dep  578 bytes
 build/gb.sym  2295 bytes
 ```
 
 - 工具链：xPack GNU Arm Embedded GCC 15.2.1
-- `gb.mo` SHA-256：`984F3E6093F9C00F4A8FD71FB73B9290CBEE48271488E5FE2BF566F66B0B0B4A`
+- `gb.mo` SHA-256：`FF10B575F34AD67CD89E031386C860C4EF73A3E3841E87AFE1E5E432FEF3FE51`
 - `gb.dep` 共 43 个未解析符号，在 6D.116 的 `6D_116.sym` 中全部找到（0 missing）
 - 主机构建已验证：Walnut-CGB 加载 `dmg-acid2.gb`，连续 30 帧帧缓冲非零
 - **尚未在 6D 实机运行**：显示/音频/按键需要实机确认
@@ -140,6 +140,7 @@ Walnut-CGB 和 minigb_apu 都使用 `-O3`；CGB 调色板用 64 项 RGB332 LUT �
 ## 许可
 
 模块、Walnut-CGB 和 minigb_apu 均为 MIT；许可证分别见 `LICENSE-Walnut-CGB`、`LICENSE-minigb-apu`。
+
 
 
 

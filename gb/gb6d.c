@@ -15,7 +15,6 @@
 #include "gb_core.h"
 #include "gb_audio_ml.h"
 #include "gb_rom.h"
-#include "libretro.h"
 #define GB6D_CONFIG_DEFINE
 #include "gb_config.h"
 
@@ -29,21 +28,7 @@
 #define GB6D_LOG_PATH "ML/LOGS/GB6D.LOG"
 
 extern int menu_redraw_blocked;
-const char *retro_gb_error(void);
 void gb6d_core_set_frameskip(int enabled);
-void retro_host_audio_read(int16_t *samples, unsigned int count);
-
-struct gb6d_bmp_vram_info
-{
-    uint8_t *vram0;
-    uint32_t off_0x04;
-    uint8_t *vram2;
-};
-extern struct gb6d_bmp_vram_info bmp_vram_info[];
-static uint8_t *gb_bmp_vram0_original;
-static uint8_t *gb_bmp_vram2_original;
-
-#define GB_TARGET_6D 1
 
 #ifndef ASIF_MAX_VOL
 #define ASIF_MAX_VOL 10
@@ -73,137 +58,6 @@ static int gb_palette_saved;
 static int gb_video_started;
 static unsigned int gb_frames;
 static uint32_t gb_started_ms;
-
-#define GB_HOST_AUDIO_RING 8192
-static uint8_t retro_frame[160 * 144];
-static int16_t host_audio_ring[GB_HOST_AUDIO_RING];
-static volatile unsigned host_audio_write;
-static volatile unsigned host_audio_read;
-static unsigned host_audio_underruns;
-static unsigned host_audio_overflows;
-static uint8_t retro_input[GB6D_BUTTON_COUNT];
-static enum retro_pixel_format host_pixel_format = RETRO_PIXEL_FORMAT_RGB332;
-
-static void host_audio_push(int16_t sample)
-{
-    unsigned next = (host_audio_write + 1) % GB_HOST_AUDIO_RING;
-    if (next == host_audio_read)
-    {
-        host_audio_overflows++;
-        return;
-    }
-    host_audio_ring[host_audio_write] = sample;
-    host_audio_write = next;
-}
-
-static size_t retro_host_audio_batch(const int16_t *data, size_t frames)
-{
-    size_t i;
-    for (i = 0; i < frames; i++)
-    {
-        int mixed = ((int)data[i * 2] + (int)data[i * 2 + 1]) / 2;
-        host_audio_push((int16_t)mixed);
-    }
-    return frames;
-}
-
-void retro_host_audio_read(int16_t *samples, unsigned int count)
-{
-    gb6d_core_render_audio(samples, count);
-}
-
-static bool retro_host_environment(unsigned cmd, void *data)
-{
-    switch (cmd)
-    {
-        case RETRO_ENVIRONMENT_SET_PIXEL_FORMAT:
-            if (!data)
-                return false;
-            host_pixel_format = *(const enum retro_pixel_format *)data;
-            return host_pixel_format == RETRO_PIXEL_FORMAT_RGB332 ||
-                   host_pixel_format == RETRO_PIXEL_FORMAT_RGB565;
-        case RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY:
-            if (data) *(const char **)data = "ML/GB/";
-            return true;
-        case RETRO_ENVIRONMENT_GET_SAVE_DIRECTORY:
-            if (data) *(const char **)data = "ML/SAVES/";
-            return true;
-        default:
-            return false;
-    }
-}
-
-static void retro_host_video(const void *data, unsigned width,
-                             unsigned height, size_t pitch)
-{
-    unsigned x, y;
-    (void)pitch;
-    if (!data || width > 160 || height > 144)
-        return;
-
-    if (host_pixel_format == RETRO_PIXEL_FORMAT_RGB332)
-    {
-        memcpy(retro_frame, data, 160 * 144);
-        return;
-    }
-
-    if (host_pixel_format == RETRO_PIXEL_FORMAT_RGB565)
-    {
-        const uint16_t *src = (const uint16_t *)data;
-        for (y = 0; y < height; y++)
-        {
-            for (x = 0; x < width; x++)
-            {
-                uint16_t color = src[y * 160 + x];
-                unsigned r = (color >> 11) & 0x1f;
-                unsigned g = (color >> 5) & 0x3f;
-                unsigned b = color & 0x1f;
-                retro_frame[y * 160 + x] =
-                    (uint8_t)(((r >> 2) << 5) | ((g >> 3) << 2) | (b >> 3));
-            }
-        }
-    }
-}
-
-static void retro_host_input_poll(void)
-{
-}
-
-static int16_t retro_host_input_state(unsigned port, unsigned device,
-                                      unsigned index, unsigned id)
-{
-    if (port || device != RETRO_DEVICE_JOYPAD || index)
-        return 0;
-    switch (id)
-    {
-        case RETRO_DEVICE_ID_JOYPAD_UP:
-            return retro_input[GB6D_BUTTON_UP] ? 1 : 0;
-        case RETRO_DEVICE_ID_JOYPAD_DOWN:
-            return retro_input[GB6D_BUTTON_DOWN] ? 1 : 0;
-        case RETRO_DEVICE_ID_JOYPAD_LEFT:
-            return retro_input[GB6D_BUTTON_LEFT] ? 1 : 0;
-        case RETRO_DEVICE_ID_JOYPAD_RIGHT:
-            return retro_input[GB6D_BUTTON_RIGHT] ? 1 : 0;
-        case RETRO_DEVICE_ID_JOYPAD_A:
-            return retro_input[GB6D_BUTTON_A] ? 1 : 0;
-        case RETRO_DEVICE_ID_JOYPAD_B:
-            return retro_input[GB6D_BUTTON_B] ? 1 : 0;
-        case RETRO_DEVICE_ID_JOYPAD_SELECT:
-            return retro_input[GB6D_BUTTON_SELECT] ? 1 : 0;
-        case RETRO_DEVICE_ID_JOYPAD_START:
-            return retro_input[GB6D_BUTTON_START] ? 1 : 0;
-        default:
-            return 0;
-    }
-}
-
-static void retro_host_reset_audio(void)
-{
-    host_audio_write = 0;
-    host_audio_read = 0;
-    host_audio_underruns = 0;
-    host_audio_overflows = 0;
-}
 
 static int gb_clamp(int value)
 {
@@ -269,20 +123,9 @@ static void gb_clear_screen(void)
         memset(vram + y * BMPPITCH, 0x00, GB6D_SCREEN_W);
 }
 
-static void gb_copy_idle_to_real(void)
-{
-    uint8_t *src = bmp_vram_idle();
-    uint8_t *dst = bmp_vram();
-    int y;
-    if (!src || !dst)
-        return;
-    for (y = 0; y < GB6D_SCREEN_H; y++)
-        memcpy(dst + y * BMPPITCH, src + y * BMPPITCH, GB6D_SCREEN_W);
-}
-
 static void gb_draw_frame(void)
 {
-    const uint8_t *src = retro_frame;
+    const uint8_t *src = gb6d_core_framebuffer();
     uint8_t *vram = bmp_vram();
     uint8_t row[720];
     int x, y, dy;
@@ -445,7 +288,6 @@ static void gb_process_input(void)
     {
         gb_input_event event = gb_queue[gb_queue_read];
         gb_queue_read = (gb_queue_read + 1) % GB6D_QUEUE_SIZE;
-        retro_input[event.button] = event.pressed;
         gb6d_core_set_button((enum gb6d_button)event.button,
                                event.pressed);
     }
@@ -570,15 +412,10 @@ static void gb_task(void *arg)
     free(rom_data);
 
     gb_install_palette();
-    gb_bmp_vram0_original = bmp_vram_info[1].vram0;
-    gb_bmp_vram2_original = bmp_vram_info[1].vram2;
-    gb6d_config_buffer = 0;
-    bmp_draw_to_idle(0);
     clrscr();
     gb_clear_screen();
     menu_redraw_blocked = 1;
     gb_reset_input_queue();
-    retro_host_reset_audio();
     gb6d_core_set_frameskip(0);
     gb_frames = 0;
     gb_started_ms = (uint32_t)get_ms_clock();
@@ -598,7 +435,6 @@ static void gb_task(void *arg)
         gb_process_input();
         mark = (uint32_t)get_ms_clock();
         gb6d_core_run_frame();
-        memcpy(retro_frame, gb6d_core_framebuffer(), 160 * 144);
         elapsed = (uint32_t)get_ms_clock() - mark;
         core_total += elapsed;
         if (elapsed > core_peak) core_peak = elapsed;
@@ -622,15 +458,6 @@ static void gb_task(void *arg)
         drawn = (!skip_active || (gb_frames & 1) == 0);
         if (drawn)
             gb_draw_frame();
-        if (drawn && gb6d_config_buffer == 1)
-            gb_copy_idle_to_real();
-        if (drawn && gb6d_config_buffer == 2)
-        {
-            uint8_t *front = bmp_vram_info[1].vram0;
-            uint8_t *back = bmp_vram_info[1].vram2;
-            bmp_vram_info[1].vram0 = back;
-            bmp_vram_info[1].vram2 = front;
-        }
         elapsed = (uint32_t)get_ms_clock() - mark;
         display_total += elapsed;
         if (elapsed > display_peak) display_peak = elapsed;
@@ -652,8 +479,8 @@ static void gb_task(void *arg)
                      (int)gb_frames, (int)(fps10 / 10), (int)(fps10 % 10),
                      (int)core_total, (int)core_peak,
                      (int)display_total, (int)display_peak,
-                     (int)host_audio_underruns,
-                     (int)host_audio_overflows);
+                     (int)gb6d_core_audio_underruns(),
+                     (int)gb6d_core_audio_overflows());
             gb_log(perf);
         }
         if ((int32_t)(next_frame - now) > 0)
@@ -678,18 +505,13 @@ static void gb_task(void *arg)
                  (int)gb_frames, (int)(fps10 / 10), (int)(fps10 % 10),
                  (int)core_total, (int)core_peak,
                  (int)display_total, (int)display_peak,
-                 (int)host_audio_underruns,
-                 (int)host_audio_overflows);
+                 (int)gb6d_core_audio_underruns(),
+                 (int)gb6d_core_audio_overflows());
         gb_log(perf);
     }
     GB6D_AUDIO_ml_shutdown();
     gb_release_all();
     gb6d_core_shutdown();
-    bmp_draw_to_idle(0);
-    if (gb_bmp_vram0_original)
-        bmp_vram_info[1].vram0 = gb_bmp_vram0_original;
-    if (gb_bmp_vram2_original)
-        bmp_vram_info[1].vram2 = gb_bmp_vram2_original;
     gb_clear_screen();
     gb_restore_palette();
     clrscr();
@@ -838,13 +660,6 @@ static unsigned int gb_init(void)
     gb_running = 0;
     gb_task_active = 0;
     gb_roms_scanned = 0;
-    retro_host_reset_audio();
-    retro_set_environment(retro_host_environment);
-    retro_set_video_refresh(retro_host_video);
-    retro_set_audio_sample_batch(retro_host_audio_batch);
-    retro_set_input_poll(retro_host_input_poll);
-    retro_set_input_state(retro_host_input_state);
-    retro_init();
     menu_add("Games", gb_menu, COUNT(gb_menu));
     printf("gb6d: GB menu registered (6D)\n");
     return 0;
@@ -859,7 +674,6 @@ static unsigned int gb_deinit(void)
     gb_release_all();
     gb_reset_input_queue();
     gb6d_core_shutdown();
-    retro_deinit();
     gb_clear_screen();
     gb_restore_palette();
     menu_redraw_blocked = 0;
@@ -882,5 +696,6 @@ MODULE_CONFIGS_START()
     MODULE_CONFIG(gb6d_config_volume)
     MODULE_CONFIG(gb6d_config_debug)
 MODULE_CONFIGS_END()
+
 
 
