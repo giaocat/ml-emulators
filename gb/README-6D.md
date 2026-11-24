@@ -74,7 +74,7 @@ ML/GB/*.gbc
 ```sh
 cp -r gb550d-6d magiclantern/modules/gb550d
 cd magiclantern
-make -C modules/gb550d GB_6D=1 -j4
+make -C modules/gb550d -j4
 ```
 
 输出：
@@ -88,13 +88,13 @@ modules/gb550d/build/gb.mo
 ## 已构建产物
 
 ```text
-build/gb.mo   106620 bytes
+build/gb.mo   107288 bytes
 build/gb.dep  578 bytes
 build/gb.sym  2295 bytes
 ```
 
 - 工具链：xPack GNU Arm Embedded GCC 15.2.1
-- `gb.mo` SHA-256：`95557E1E4EC486CF35E04B300232B527625E348DA88B4E4DA70CC091E264D146`
+- `gb.mo` SHA-256：`0CEE9D1E09963D93CE178B0563D7FF3226490968C5B6BD3994ECBC493BF08999`
 - `gb.dep` 共 43 个未解析符号，在 6D.116 的 `6D_116.sym` 中全部找到（0 missing）
 - 主机构建已验证：Walnut-CGB 加载 `dmg-acid2.gb`，连续 30 帧帧缓冲非零
 - **尚未在 6D 实机运行**：显示/音频/按键需要实机确认
@@ -140,6 +140,7 @@ Walnut-CGB 和 minigb_apu 都使用 `-O3`；CGB 调色板用 64 项 RGB332 LUT �
 ## 许可
 
 模块、Walnut-CGB 和 minigb_apu 均为 MIT；许可证分别见 `LICENSE-Walnut-CGB`、`LICENSE-minigb-apu`。
+
 
 
 

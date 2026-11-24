@@ -18,10 +18,6 @@ CFLAGS += -DWALNUT_GB_HIGH_LCD_ACCURACY=0
 
 GB_OPT ?= -O3
 
-ifdef GB_6D
-CFLAGS += -DGB_6D
-endif
-
 $(BUILD_DIR)/walnut:
 	@mkdir -p $@
 

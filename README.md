@@ -53,8 +53,8 @@ cp -r gb gb550d
 cp -r nes nes550d
 
 cd magiclantern
-make -C modules/gb550d GB_6D=1 -j4
-make -C modules/nes550d NES_6D=1 -j4
+make -C modules/gb550d -j4
+make -C modules/nes550d -j4
 ```
 
 Outputs:
@@ -68,8 +68,8 @@ modules/nes550d/build/nes.mo
 
 | File | Size | SHA-256 |
 | --- | --- | --- |
-| `gb/gb.mo` | 107,292 | `6A45D4043494F79ABFD4B00A018F50ADD76720FEFB81B0697612305E46D0EDB5` |
-| `nes/nes.mo` | 442,220 | `E6FC31FBCC92D2D7A210882BED18C123E66EB1E2E58D707AEF4A10BA29183BCB` |
+| `gb/gb.mo` | 107,288 | `0CEE9D1E09963D93CE178B0563D7FF3226490968C5B6BD3994ECBC493BF08999` |
+| `nes/nes.mo` | 442,212 | `4FF7BAE772F1F500E5AFCA705CF23769604DA8AD3CC2F67DD6CE9ACE33B47015` |
 
 Both were validated against the 6D.116 symbol table with 0 missing imports.
 
@@ -79,3 +79,4 @@ Both were validated against the 6D.116 symbol table with 0 missing imports.
 - NES uses QuickNES 0.7 (GPL-2.0).
 - Rendering is intentionally Direct only; Double/Flip buffer modes were removed after 6D bring-up.
 - These are homebrew/porting projects; use ROMs you legally own.
+

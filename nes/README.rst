@@ -1,9 +1,9 @@
-NES 550D / 6D
-=============
+NES 6D
+======
 
 :Author: Magic Lantern contributors
 :License: GPL-2.0
-:Summary: Experimental NES module for Canon EOS 550D and 6D.
+:Summary: NES module for Canon EOS 6D.
 
 Place legally obtained iNES ROM files in ``ML/NES/``. The module lists at
 most 32 ``.nes`` files alphabetically. It contains no ROMs or commercial game
@@ -17,18 +17,8 @@ most other common mappers. Its centered
 QuickNES implements the 6502 CPU, PPU background/sprite rendering, controller
 input, OAM DMA and full APU audio at 48 kHz.
 
-Controls (550D)
----------------
-
-* Arrows: D-pad
-* SET: A
-* PLAY: B
-* DISP: Select
-* MENU: Start
-* Q: exit
-
-Controls (6D, build with ``NES_6D=1``)
-------------------------------------
+Controls (6D)
+-------------
 
 * Arrows / multi-controller: D-pad, including diagonals
 * SET: A
@@ -70,6 +60,4 @@ frame progress, CPU/PPU/display/audio performance, raw-event overflow counts,
 core errors and shutdown state. This mirrors Doom's diagnostic workflow while
 keeping all storage access outside input and audio callbacks.
 
-This experimental module supports Canon EOS 550D.109 and, with the
-``NES_6D=1`` keymap, Canon EOS 6D.116. Back up the SD card before installing
-experimental software.
+This module supports Canon EOS 6D.116. Back up the SD card before installing experimental software.

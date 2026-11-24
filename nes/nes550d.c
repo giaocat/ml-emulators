@@ -26,24 +26,15 @@ extern struct nes550d_bmp_vram_info bmp_vram_info[];
 #define NES550D_CONFIG_DEFINE
 #include "nes_config.h"
 
-/*
- * Standalone module builds do not define CONFIG_6D.  Build the 6D keymap with
- * "make NES_6D=1"; CONFIG_6D is also accepted when built in a 6D tree.
- */
-#if defined(NES_6D) || defined(CONFIG_6D)
+/* Canon EOS 6D. */
 #define NES_TARGET_6D 1
-#endif
 
 /* 60 fps mode: Direct BMP writes, render every logic frame.  The old
  * Double/Flip experiments are kept out of the active path. */
 #define NES550D_LEGACY_RENDER 0
 
 #ifndef ASIF_MAX_VOL
-#if defined(NES_TARGET_6D)
 #define ASIF_MAX_VOL 10
-#else
-#define ASIF_MAX_VOL 5
-#endif
 #endif
 
 #define NES550D_SCREEN_W 720
@@ -82,9 +73,7 @@ static volatile unsigned int nes550d_queue_read;
 static struct nes550d_input_event nes550d_queue[NES550D_QUEUE_SIZE];
 static unsigned char nes550d_button_state[NES550D_BUTTON_COUNT];
 static uint32_t nes550d_release_at[NES550D_BUTTON_COUNT];
-#if defined(NES_TARGET_6D)
 static unsigned char nes550d_dir_mask;
-#endif
 static struct nes550d_rom_list nes550d_roms;
 static int nes550d_roms_scanned;
 static char nes550d_requested_rom[FIO_MAX_PATH_LENGTH];
@@ -558,7 +547,6 @@ static void nes550d_pulse_input(enum nes550d_button button,
     nes550d_release_at[button] = (uint32_t)get_ms_clock() + duration_ms;
 }
 
-#if defined(NES_TARGET_6D)
 /*
  * The 6D sends one combined UNPRESS_UDLR event (0x36) instead of four
  * per-direction releases.  Keep all directions pressed until that event, and
@@ -585,7 +573,6 @@ static void nes550d_set_directions(unsigned char mask)
     if (mask & 0x08) nes550d_queue_input(NES550D_BUTTON_RIGHT, 1);
     nes550d_dir_mask = mask;
 }
-#endif
 
 static void nes550d_release_all(void)
 {
@@ -595,9 +582,7 @@ static void nes550d_release_all(void)
         nes550d_release_at[i] = 0;
         nes550d_queue_input((enum nes550d_button)i, 0);
     }
-#if defined(NES_TARGET_6D)
     nes550d_dir_mask = 0;
-#endif
 }
 
 static const char *nes550d_input_name(enum nes550d_button button, int pressed)
@@ -651,9 +636,7 @@ static void nes550d_reset_input_queue(void)
     memset(nes550d_queue, 0, sizeof(nes550d_queue));
     memset(nes550d_button_state, 0, sizeof(nes550d_button_state));
     memset(nes550d_release_at, 0, sizeof(nes550d_release_at));
-#if defined(NES_TARGET_6D)
     nes550d_dir_mask = 0;
-#endif
 }
 
 static void nes550d_scan_roms(void)
@@ -847,14 +830,10 @@ static void nes550d_task(void *arg)
             int vsync_due = !nes550d_vsync_seen ||
                             vsync_now != nes550d_last_vsync;
             int render_due = 1;
-#if defined(NES_TARGET_6D)
             if (NES550D_LEGACY_RENDER)
                 render_due = !(nes550d_profile.frames & 3);
             else if (nes550d_vsync_seen)
                 render_due = vsync_due;
-#else
-            render_due = !(nes550d_profile.frames & 3);
-#endif
         if (ppu_ready &&
             ((render_due && on_time) || forced))
         {
@@ -1174,7 +1153,6 @@ static struct menu_entry nes550d_menu[] =
     }
 };
 
-#if defined(NES_TARGET_6D)
 /* Canon EOS 6D raw GUI event values (platform/6D.116/gui.h). */
 #define NES550D_PRESS_UP       0x2e
 #define NES550D_PRESS_UP_RIGHT 0x2f
@@ -1193,23 +1171,6 @@ static struct menu_entry nes550d_menu[] =
 #define NES550D_PRESS_ZOOM_IN  0x12
 #define NES550D_UNPRESS_ZOOM_IN 0x13
 #define NES550D_Q              0x1d
-#else
-/* Canon EOS 550D firmware 1.0.9 raw GUI event values. */
-#define NES550D_PRESS_RIGHT   0x1a
-#define NES550D_RELEASE_RIGHT 0x1b
-#define NES550D_PRESS_LEFT    0x1c
-#define NES550D_RELEASE_LEFT  0x1d
-#define NES550D_PRESS_UP      0x1e
-#define NES550D_RELEASE_UP    0x1f
-#define NES550D_PRESS_DOWN    0x20
-#define NES550D_RELEASE_DOWN  0x21
-#define NES550D_PRESS_SET     0x04
-#define NES550D_RELEASE_SET   0x05
-#define NES550D_MENU          0x06
-#define NES550D_INFO          0x07
-#define NES550D_PLAY          0x09
-#define NES550D_Q             0x0f
-#endif
 
 static unsigned int nes550d_keypress_raw(unsigned int context)
 {
@@ -1221,7 +1182,6 @@ static unsigned int nes550d_keypress_raw(unsigned int context)
     if (event->type != 0)
         return 1;
     key = event->param;
-#if defined(NES_TARGET_6D)
     switch (key)
     {
         case NES550D_PRESS_UP:
@@ -1284,29 +1244,6 @@ static unsigned int nes550d_keypress_raw(unsigned int context)
         default:
             return 1;
     }
-#else
-    switch (key)
-    {
-        case NES550D_PRESS_UP: nes550d_queue_input(NES550D_BUTTON_UP, 1); return 0;
-        case NES550D_RELEASE_UP: nes550d_queue_input(NES550D_BUTTON_UP, 0); return 0;
-        case NES550D_PRESS_DOWN: nes550d_queue_input(NES550D_BUTTON_DOWN, 1); return 0;
-        case NES550D_RELEASE_DOWN: nes550d_queue_input(NES550D_BUTTON_DOWN, 0); return 0;
-        case NES550D_PRESS_LEFT: nes550d_queue_input(NES550D_BUTTON_LEFT, 1); return 0;
-        case NES550D_RELEASE_LEFT: nes550d_queue_input(NES550D_BUTTON_LEFT, 0); return 0;
-        case NES550D_PRESS_RIGHT: nes550d_queue_input(NES550D_BUTTON_RIGHT, 1); return 0;
-        case NES550D_RELEASE_RIGHT: nes550d_queue_input(NES550D_BUTTON_RIGHT, 0); return 0;
-        case NES550D_PRESS_SET: nes550d_queue_input(NES550D_BUTTON_A, 1); return 0;
-        case NES550D_RELEASE_SET: nes550d_queue_input(NES550D_BUTTON_A, 0); return 0;
-        case NES550D_PLAY: nes550d_pulse_input(NES550D_BUTTON_B, 140); return 0;
-        case NES550D_INFO: nes550d_pulse_input(NES550D_BUTTON_SELECT, 300); return 0;
-        case NES550D_MENU: nes550d_pulse_input(NES550D_BUTTON_START, 400); return 0;
-        case NES550D_Q:
-            nes550d_stop_key = key;
-            nes550d_running = 0;
-            return 0;
-        default: return 1;
-    }
-#endif
 }
 
 static unsigned int nes550d_vsync_cbr(unsigned int context)
@@ -1323,11 +1260,7 @@ static unsigned int nes550d_init(void)
     nes550d_task_active = 0;
     nes550d_roms_scanned = 0;
     menu_add("Games", nes550d_menu, COUNT(nes550d_menu));
-#if defined(NES_TARGET_6D)
-    printf("nes550d: NES menu registered (6D keymap)\n");
-#else
-    printf("nes550d: NES menu registered (550D.109 only)\n");
-#endif
+    printf("nes550d: NES menu registered (6D)\n");
     return 0;
 }
 

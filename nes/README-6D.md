@@ -30,7 +30,7 @@
 在 `Games → NES` 菜单里：
 
 - `Audio` 必须为 `ON`；
-- `Volume` 可调 `1` 到 `ASIF_MAX_VOL`（6D 为 10，550D 为 5）；
+- `Volume` 可调 `1` 到 `ASIF_MAX_VOL`（6D 为 10）；
 - `1` 最轻，数值越大越响；`Audio = OFF` 为静音。
 
 音量在 `Start NES` 时应用到 Canon 音频输出；如果已经进入游戏，先按 `Q` 退出，改完再重新启动。
@@ -42,7 +42,7 @@
 ```sh
 cp -r nes550d-6d magiclantern/modules/nes550d
 cd magiclantern
-make -C modules/nes550d NES_6D=1 -j4
+make -C modules/nes550d -j4
 ```
 
 生成：
@@ -68,13 +68,13 @@ ML/NES/*.nes
 ## 已构建的产物
 
 ```text
-build/nes.mo   442220 bytes
+build/nes.mo   442212 bytes
 build/nes.dep  682 bytes
 build/nes.sym  24869 bytes
 ```
 
 - 工具链：xPack GNU Arm Embedded GCC 15.2.1
-- `nes.mo` SHA-256：`E6FC31FBCC92D2D7A210882BED18C123E66EB1E2E58D707AEF4A10BA29183BCB`
+- `nes.mo` SHA-256：`4FF7BAE772F1F500E5AFCA705CF23769604DA8AD3CC2F67DD6CE9ACE33B47015`
 - `nes.dep` 共 45 个未解析符号，在 6D.116 的 `6D_116.sym` 中全部找到（0 missing）
 - 已确认编译进 6D 分支：`nes550d: NES menu registered (6D keymap)` 字符串
 - QuickNES 的 Blip_Buffer 均衡器需要 `libm`；链接时已把 `libm`/`libgcc` 静态链进模块，不依赖相机导出 `cos/exp/pow`
@@ -123,5 +123,6 @@ build/nes.sym  24869 bytes
 ## 许可
 
 上游项目与 GPL-2.0 兼容；Doom/NES 商业 ROM 不随本项目分发。
+
 
 

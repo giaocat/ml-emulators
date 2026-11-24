@@ -43,16 +43,10 @@ extern struct gb550d_bmp_vram_info bmp_vram_info[];
 static uint8_t *gb_bmp_vram0_original;
 static uint8_t *gb_bmp_vram2_original;
 
-#if defined(GB_6D) || defined(CONFIG_6D)
 #define GB_TARGET_6D 1
-#endif
 
 #ifndef ASIF_MAX_VOL
-#if defined(GB_TARGET_6D)
 #define ASIF_MAX_VOL 10
-#else
-#define ASIF_MAX_VOL 5
-#endif
 #endif
 
 typedef struct
@@ -457,7 +451,6 @@ static void gb_process_input(void)
     }
 }
 
-#if defined(GB_TARGET_6D)
 #define GB_PRESS_UP         0x2e
 #define GB_PRESS_UP_RIGHT   0x2f
 #define GB_PRESS_RIGHT      0x30
@@ -475,22 +468,6 @@ static void gb_process_input(void)
 #define GB_PRESS_ZOOM_IN    0x12
 #define GB_UNPRESS_ZOOM_IN  0x13
 #define GB_Q                0x1d
-#else
-#define GB_PRESS_RIGHT      0x1a
-#define GB_RELEASE_RIGHT    0x1b
-#define GB_PRESS_LEFT       0x1c
-#define GB_RELEASE_LEFT     0x1d
-#define GB_PRESS_UP         0x1e
-#define GB_RELEASE_UP       0x1f
-#define GB_PRESS_DOWN       0x20
-#define GB_RELEASE_DOWN     0x21
-#define GB_PRESS_SET        0x04
-#define GB_RELEASE_SET      0x05
-#define GB_MENU             0x06
-#define GB_INFO             0x07
-#define GB_PLAY             0x09
-#define GB_Q                0x0f
-#endif
 
 static unsigned int gb_keypress_raw(unsigned int context)
 {
@@ -499,7 +476,6 @@ static unsigned int gb_keypress_raw(unsigned int context)
     if (!gb_running || !event) return 1;
     if (event->type != 0) return 1;
     key = event->param;
-#if defined(GB_TARGET_6D)
     switch (key)
     {
         case GB_PRESS_UP: gb_set_directions(0x01); return 0;
@@ -528,26 +504,6 @@ static unsigned int gb_keypress_raw(unsigned int context)
             return 0;
         default: return 1;
     }
-#else
-    switch (key)
-    {
-        case GB_PRESS_UP: gb_queue_input(GB550D_BUTTON_UP, 1); return 0;
-        case GB_RELEASE_UP: gb_queue_input(GB550D_BUTTON_UP, 0); return 0;
-        case GB_PRESS_DOWN: gb_queue_input(GB550D_BUTTON_DOWN, 1); return 0;
-        case GB_RELEASE_DOWN: gb_queue_input(GB550D_BUTTON_DOWN, 0); return 0;
-        case GB_PRESS_LEFT: gb_queue_input(GB550D_BUTTON_LEFT, 1); return 0;
-        case GB_RELEASE_LEFT: gb_queue_input(GB550D_BUTTON_LEFT, 0); return 0;
-        case GB_PRESS_RIGHT: gb_queue_input(GB550D_BUTTON_RIGHT, 1); return 0;
-        case GB_RELEASE_RIGHT: gb_queue_input(GB550D_BUTTON_RIGHT, 0); return 0;
-        case GB_PRESS_SET: gb_queue_input(GB550D_BUTTON_A, 1); return 0;
-        case GB_RELEASE_SET: gb_queue_input(GB550D_BUTTON_A, 0); return 0;
-        case GB_PLAY: gb_pulse_input(GB550D_BUTTON_B, 140); return 0;
-        case GB_INFO: gb_pulse_input(GB550D_BUTTON_SELECT, 300); return 0;
-        case GB_MENU: gb_pulse_input(GB550D_BUTTON_START, 400); return 0;
-        case GB_Q: gb_running = 0; return 0;
-        default: return 1;
-    }
-#endif
 }
 
 static uint8_t *gb_load_rom(const char *path, unsigned int *size_out)
@@ -890,11 +846,7 @@ static unsigned int gb_init(void)
     retro_set_input_state(retro_host_input_state);
     retro_init();
     menu_add("Games", gb_menu, COUNT(gb_menu));
-#if defined(GB_TARGET_6D)
-    printf("gb550d: GB menu registered (6D keymap)\n");
-#else
-    printf("gb550d: GB menu registered\n");
-#endif
+    printf("gb550d: GB menu registered (6D)\n");
     return 0;
 }
 

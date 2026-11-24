@@ -27,12 +27,6 @@ CXXFLAGS_QNES = -std=gnu++11 -fno-exceptions -fno-rtti \
 
 CFLAGS += -I. -I$(QNES_DIR) -Wno-error
 
-# Canon EOS 6D raw key codes (standalone builds do not define CONFIG_6D):
-#   make NES_6D=1
-ifdef NES_6D
-CFLAGS += -DNES_6D
-endif
-
 $(BUILD_DIR)/qnes:
 	@mkdir -p $@
 
