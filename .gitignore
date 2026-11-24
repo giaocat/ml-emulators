@@ -1,0 +1,12 @@
+build/
+*.o
+*.d
+*.tmp
+*.zip
+*.log
+*.sav
+*.nes
+*.gb
+*.gbc
+!gb/gb.mo
+!nes/nes.mo

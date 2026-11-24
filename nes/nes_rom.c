@@ -1,0 +1,127 @@
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <module.h>
+#include <dryos.h>
+#include <fio-ml.h>
+
+#include "nes_rom.h"
+
+static int nes550d_ascii_lower(int c)
+{
+    return c >= 'A' && c <= 'Z' ? c + ('a' - 'A') : c;
+}
+
+static int nes550d_name_compare(const char *a, const char *b)
+{
+    while (*a && *b)
+    {
+        int difference = nes550d_ascii_lower(*a) - nes550d_ascii_lower(*b);
+        if (difference)
+            return difference;
+        a++;
+        b++;
+    }
+    return nes550d_ascii_lower(*a) - nes550d_ascii_lower(*b);
+}
+
+static int nes550d_has_extension(const char *name)
+{
+    unsigned int length = strlen(name);
+    return length > 4 && name[length - 4] == '.' &&
+           nes550d_ascii_lower(name[length - 3]) == 'n' &&
+           nes550d_ascii_lower(name[length - 2]) == 'e' &&
+           nes550d_ascii_lower(name[length - 1]) == 's';
+}
+
+int nes550d_rom_make_path(char *path, unsigned int size, const char *name)
+{
+    int length = snprintf(path, size, "%s%s", NES550D_ROM_DIRECTORY, name);
+    return length >= 0 && (unsigned int)length < size;
+}
+
+int nes550d_rom_validate_ines(const char *path)
+{
+    unsigned char header[16];
+    FILE *file = FIO_OpenFile(path, O_RDONLY | O_SYNC);
+    int read;
+
+    if (!file)
+        return 0;
+    read = FIO_ReadFile(file, header, sizeof(header));
+    FIO_CloseFile(file);
+
+    return read == (int)sizeof(header) &&
+           header[0] == 'N' && header[1] == 'E' &&
+           header[2] == 'S' && header[3] == 0x1a &&
+           (header[4] != 0 || header[5] != 0);
+}
+
+unsigned int nes550d_rom_name_id(const char *name)
+{
+    unsigned int hash = 2166136261u;
+    while (*name)
+    {
+        hash ^= (unsigned int)nes550d_ascii_lower((unsigned char)*name++);
+        hash *= 16777619u;
+    }
+    return hash ? hash : 1;
+}
+
+int nes550d_rom_find_id(const struct nes550d_rom_list *list, unsigned int id)
+{
+    int i;
+    if (!id)
+        return list->count ? 0 : -1;
+    for (i = 0; i < list->count; i++)
+        if (nes550d_rom_name_id(list->names[i]) == id)
+            return i;
+    return -1;
+}
+
+int nes550d_rom_scan(struct nes550d_rom_list *list)
+{
+    struct fio_file *file;
+    struct fio_dirent *dirent;
+    int i;
+    int j;
+
+    memset(list, 0, sizeof(*list));
+    file = alloc_fio_file();
+    if (!file)
+        return -1;
+
+    dirent = FIO_FindFirstEx(NES550D_ROM_DIRECTORY, file);
+    if (!IS_ERROR(dirent))
+    {
+        list->directory_found = 1;
+        do
+        {
+            struct file_info info = convert_fio_file_info(file);
+            char path[FIO_MAX_PATH_LENGTH];
+            if (!info.name[0] || (info.mode & ATTR_DIRECTORY) ||
+                !nes550d_has_extension(info.name) ||
+                !nes550d_rom_make_path(path, sizeof(path), info.name) ||
+                !nes550d_rom_validate_ines(path))
+                continue;
+            snprintf(list->names[list->count], sizeof(list->names[0]),
+                     "%s", info.name);
+            list->count++;
+        }
+        while (list->count < NES550D_MAX_ROMS &&
+               FIO_FindNextEx(dirent, file) == 0);
+        FIO_FindClose(dirent);
+    }
+    free(file);
+
+    for (i = 0; i < list->count - 1; i++)
+        for (j = i + 1; j < list->count; j++)
+            if (nes550d_name_compare(list->names[i], list->names[j]) > 0)
+            {
+                char temporary[FIO_MAX_PATH_LENGTH];
+                memcpy(temporary, list->names[i], sizeof(temporary));
+                memcpy(list->names[i], list->names[j], sizeof(temporary));
+                memcpy(list->names[j], temporary, sizeof(temporary));
+            }
+    return list->count;
+}
