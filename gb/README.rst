@@ -1,4 +1,4 @@
-GB550D
+GB6D
 ======
 
 :Author: Magic Lantern contributors
@@ -20,4 +20,5 @@ Controls
 * Q: exit
 
 The 6D build is selected with ``GB_6D=1``.
+
 

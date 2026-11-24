@@ -39,14 +39,14 @@ on the next ``Start NES``.
 The QuickNES core accepts standard iNES images and supports the common
 NROM/UxROM/CNROM/MMC1/MMC3/MMC5/VRC/FME-7 mapper families. Unsupported
 mappers and malformed ROMs are rejected with a clear message. PAL timing,
-save states and battery-backed persistence are not exposed by the NES550D
+save states and battery-backed persistence are not exposed by the NES6D
 shell yet.
 
 Debug logging
 -------------
 
 ``Debug logging`` is persistent and defaults to ``OFF``. When enabled, session
-messages go to ``ML/LOGS/NES550D.LOG`` and buffered raw input events are
+messages go to ``ML/LOGS/NES6D.LOG`` and buffered raw input events are
 written to ``ML/LOGS/NESRAW.LOG`` after the session. Button callbacks never
 perform card I/O. ``Clear NES logs`` removes only ``ML/LOGS/NES*.LOG`` and
 never removes ROMs or configuration.
@@ -61,3 +61,4 @@ core errors and shutdown state. This mirrors Doom's diagnostic workflow while
 keeping all storage access outside input and audio callbacks.
 
 This module supports Canon EOS 6D.116. Back up the SD card before installing experimental software.
+

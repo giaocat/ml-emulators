@@ -1,7 +1,7 @@
 MODULE_NAME = gb
 
 MODULE_OBJS = \
-    $(BUILD_DIR)/gb550d.o \
+    $(BUILD_DIR)/gb6d.o \
     $(BUILD_DIR)/gb_core.o \
     $(BUILD_DIR)/retro_gb.o \
     $(BUILD_DIR)/gb_audio_ml.o \
@@ -27,6 +27,7 @@ $(BUILD_DIR)/walnut/minigb_apu.o: walnut/minigb_apu.c | $(BUILD_DIR)/walnut
 # Walnut-GB is a single-header core; it is compiled inside gb_core.c.
 $(BUILD_DIR)/gb_core.o: CFLAGS += $(GB_OPT)
 $(BUILD_DIR)/retro_gb.o: CFLAGS += $(GB_OPT) -mno-long-calls
-$(BUILD_DIR)/gb550d.o: CFLAGS += $(GB_OPT) -mno-long-calls
+$(BUILD_DIR)/gb6d.o: CFLAGS += $(GB_OPT) -mno-long-calls
 
 .DEFAULT_GOAL := $(BUILD_DIR)/module_complete
+

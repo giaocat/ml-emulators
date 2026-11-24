@@ -1,4 +1,4 @@
-# GB550D — Canon EOS 6D Game Boy / Game Boy Color
+# GB6D — Canon EOS 6D Game Boy / Game Boy Color
 
 这是给 Canon EOS 6D（ML 6D.116）的 GB/GBC 模块，核心使用 [Walnut-CGB](https://github.com/Mr-PauI/Walnut-CGB)（MIT，单头文件、DMG/GBC、性能优先）。
 
@@ -7,7 +7,7 @@
 本模块已经改成 libretro 风格的 host / core 分层：
 
 ```text
-gb550d.c        host：菜单、ROM、BMP 3×、ASIF、6D 按键
+gb6d.c        host：菜单、ROM、BMP 3×、ASIF、6D 按键
 retro_gb.c      core 适配层：实现 retro_* ABI
 gb_core.c       Walnut-CGB 后端
 walnut/         Walnut-CGB + minigb APU
@@ -72,15 +72,15 @@ ML/GB/*.gbc
 ## 构建
 
 ```sh
-cp -r gb550d-6d magiclantern/modules/gb550d
+cp -r gb6d magiclantern/modules/gb6d
 cd magiclantern
-make -C modules/gb550d -j4
+make -C modules/gb6d -j4
 ```
 
 输出：
 
 ```text
-modules/gb550d/build/gb.mo
+modules/gb6d/build/gb.mo
 ```
 
 `GB_6D=1` 会定义 `GB_6D`，启用 6D 原始键码。
@@ -88,13 +88,13 @@ modules/gb550d/build/gb.mo
 ## 已构建产物
 
 ```text
-build/gb.mo   107288 bytes
+build/gb.mo   107196 bytes
 build/gb.dep  578 bytes
 build/gb.sym  2295 bytes
 ```
 
 - 工具链：xPack GNU Arm Embedded GCC 15.2.1
-- `gb.mo` SHA-256：`0CEE9D1E09963D93CE178B0563D7FF3226490968C5B6BD3994ECBC493BF08999`
+- `gb.mo` SHA-256：`984F3E6093F9C00F4A8FD71FB73B9290CBEE48271488E5FE2BF566F66B0B0B4A`
 - `gb.dep` 共 43 个未解析符号，在 6D.116 的 `6D_116.sym` 中全部找到（0 missing）
 - 主机构建已验证：Walnut-CGB 加载 `dmg-acid2.gb`，连续 30 帧帧缓冲非零
 - **尚未在 6D 实机运行**：显示/音频/按键需要实机确认
@@ -114,7 +114,7 @@ build/gb.sym  2295 bytes
 
 ## 性能诊断
 
-打开 `Debug logging` 后，`ML/LOGS/GB550D.LOG` 每 300 帧会写一行：
+打开 `Debug logging` 后，`ML/LOGS/GB6D.LOG` 每 300 帧会写一行：
 
 ```text
 PERF frames=... fps=... core=总耗时/峰值 display=总耗时/峰值 audio_under=... audio_over=...
@@ -140,6 +140,8 @@ Walnut-CGB 和 minigb_apu 都使用 `-O3`；CGB 调色板用 64 项 RGB332 LUT �
 ## 许可
 
 模块、Walnut-CGB 和 minigb_apu 均为 MIT；许可证分别见 `LICENSE-Walnut-CGB`、`LICENSE-minigb-apu`。
+
+
 
 
 

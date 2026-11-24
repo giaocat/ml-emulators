@@ -49,27 +49,27 @@ Both modules have a `Volume` menu; audio goes through Canon ASIF-DMA at 48 kHz.
 Requirements: Magic Lantern source tree, xPack ARM GCC, Python for module help strings.
 
 ```sh
-cp -r gb gb550d
-cp -r nes nes550d
+cp -r gb gb6d
+cp -r nes nes6d
 
 cd magiclantern
-make -C modules/gb550d -j4
-make -C modules/nes550d -j4
+make -C modules/gb6d -j4
+make -C modules/nes6d -j4
 ```
 
 Outputs:
 
 ```text
-modules/gb550d/build/gb.mo
-modules/nes550d/build/nes.mo
+modules/gb6d/build/gb.mo
+modules/nes6d/build/nes.mo
 ```
 
 ## Binaries
 
 | File | Size | SHA-256 |
 | --- | --- | --- |
-| `gb/gb.mo` | 107,288 | `0CEE9D1E09963D93CE178B0563D7FF3226490968C5B6BD3994ECBC493BF08999` |
-| `nes/nes.mo` | 442,212 | `4FF7BAE772F1F500E5AFCA705CF23769604DA8AD3CC2F67DD6CE9ACE33B47015` |
+| `gb/gb.mo` | 107,196 | `984F3E6093F9C00F4A8FD71FB73B9290CBEE48271488E5FE2BF566F66B0B0B4A` |
+| `nes/nes.mo` | 441,600 | `5EEAC27FFD1BE104F4A9BD00C850B84440D154825DB294A0EDA30C6F5B9958C0` |
 
 Both were validated against the 6D.116 symbol table with 0 missing imports.
 
@@ -79,4 +79,5 @@ Both were validated against the 6D.116 symbol table with 0 missing imports.
 - NES uses QuickNES 0.7 (GPL-2.0).
 - Rendering is intentionally Direct only; Double/Flip buffer modes were removed after 6D bring-up.
 - These are homebrew/porting projects; use ROMs you legally own.
+
 

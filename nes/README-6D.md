@@ -1,10 +1,10 @@
-# NES550D — Canon EOS 6D / QuickNES
+# NES6D — Canon EOS 6D / QuickNES
 
-这是 [lauris-nl/nes550d](https://github.com/lauris-nl/nes550d) 的 6D 版本，但**核心已替换为 [QuickNES](https://github.com/kode54/QuickNES_Core)**（GPL-2.0）。
+这是 [lauris-nl/nes6d](https://github.com/lauris-nl/nes6d) 的 6D 版本，但**核心已替换为 [QuickNES](https://github.com/kode54/QuickNES_Core)**（GPL-2.0）。
 
 原来的自制 NES 核心只支持 Mapper 0/1/4，兼容性和 CPU/PPU/APU 行为有限；QuickNES 是成熟的 NES 模拟器核心，支持绝大多数常见 Mapper（NROM、UxROM、CNROM、MMC1、MMC3、MMC5、VRC、FME-7 等），带完整 APU 和成比例音频输出。
 
-本目录保留 NES550D 的 ML 外壳（菜单、ROM 扫描、720×480 显示、ASIF-DMA 音频、6D 按键队列），只把 `nes_core_*` 后面的核心换掉。
+本目录保留 NES6D 的 ML 外壳（菜单、ROM 扫描、720×480 显示、ASIF-DMA 音频、6D 按键队列），只把 `nes_core_*` 后面的核心换掉。
 
 ## 6D 操作
 
@@ -40,15 +40,15 @@
 把本目录复制到魔灯源码树：
 
 ```sh
-cp -r nes550d-6d magiclantern/modules/nes550d
+cp -r nes6d magiclantern/modules/nes6d
 cd magiclantern
-make -C modules/nes550d -j4
+make -C modules/nes6d -j4
 ```
 
 生成：
 
 ```text
-modules/nes550d/build/nes.mo
+modules/nes6d/build/nes.mo
 ```
 
 必须带 `NES_6D=1`（会定义 `NES_6D`）。standalone 模块构建通常不会定义 `CONFIG_6D`；若在 6D 平台树中编译，`CONFIG_6D` 也会自动启用。
@@ -63,20 +63,20 @@ ML/NES/*.nes
 - `ML/NES/` 最多列出 32 个 `.nes` 文件，按字母序。
 - 使用 QuickNES 的 Mapper 支持，覆盖绝大多数常见 iNES 游戏；不支持的 Mapper 会明确报错。
 - 不包含任何 ROM 或商业游戏数据，请使用自己合法拥有的 ROM。
-- 6D 上使用 6D.116 的 `autoexec.bin` 和 `ML/modules/6D_116.sym`；不要使用 550D 的模块。
+- 6D 上使用 6D.116 的 `autoexec.bin` 和 `ML/modules/6D_116.sym`；不要使用 6D 的模块。
 
 ## 已构建的产物
 
 ```text
-build/nes.mo   442212 bytes
+build/nes.mo   441600 bytes
 build/nes.dep  682 bytes
 build/nes.sym  24869 bytes
 ```
 
 - 工具链：xPack GNU Arm Embedded GCC 15.2.1
-- `nes.mo` SHA-256：`4FF7BAE772F1F500E5AFCA705CF23769604DA8AD3CC2F67DD6CE9ACE33B47015`
+- `nes.mo` SHA-256：`5EEAC27FFD1BE104F4A9BD00C850B84440D154825DB294A0EDA30C6F5B9958C0`
 - `nes.dep` 共 45 个未解析符号，在 6D.116 的 `6D_116.sym` 中全部找到（0 missing）
-- 已确认编译进 6D 分支：`nes550d: NES menu registered (6D keymap)` 字符串
+- 已确认编译进 6D 分支：`nes6d: NES menu registered (6D keymap)` 字符串
 - QuickNES 的 Blip_Buffer 均衡器需要 `libm`；链接时已把 `libm`/`libgcc` 静态链进模块，不依赖相机导出 `cos/exp/pow`
 - **尚未在 6D 实机运行**：核心替换、按键、符号依赖和编译已验证，显示/音频/性能仍需实机确认
 
@@ -94,7 +94,7 @@ build/nes.sym  24869 bytes
 
 ## 渲染方式（60fps）
 
-当前构建使用 `NES550D_LEGACY_RENDER=0`：
+当前构建使用 `NES6D_LEGACY_RENDER=0`：
 
 - `Video`: `Exact 2x`（512×480）或 `Stretch fullscreen`（720×480）；
 - `Buffer`: 只保留 `Direct`，始终写可见 buffer。
@@ -103,9 +103,9 @@ build/nes.sym  24869 bytes
 
 ## 已知限制
 
-1. 原 NES550D 的显示、`LCD_Palette`、FIO 和 ASIF-DMA 音频仍按 550D 编写；6D 符号全部存在，但实际颜色/声音/帧率需测试。
+1. 原 NES6D 的显示、`LCD_Palette`、FIO 和 ASIF-DMA 音频仍按 6D 编写；6D 符号全部存在，但实际颜色/声音/帧率需测试。
 2. QuickNES 的 Mapper 覆盖比旧核心大得多，但不保证 100%；个别依赖特殊时序/CHR-RAM 的游戏仍可能有问题。
-3. 无 PAL 时序、即时存档、电池存档（QuickNES 本身支持存档，但 NES550D 外壳暂未接）。
+3. 无 PAL 时序、即时存档、电池存档（QuickNES 本身支持存档，但 NES6D 外壳暂未接）。
 4. 6D 上 `MENU` 被映射为 Start，无法在游戏中使用 ML 菜单；`Q` 退出。
 5. 放大键在 NES 运行期间只作为 B，不执行 Canon 放大；退出后恢复。
 
@@ -123,6 +123,8 @@ build/nes.sym  24869 bytes
 ## 许可
 
 上游项目与 GPL-2.0 兼容；Doom/NES 商业 ROM 不随本项目分发。
+
+
 
 
 

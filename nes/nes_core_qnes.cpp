@@ -1,7 +1,7 @@
 /*
- * QuickNES adapter for NES550D.
+ * QuickNES adapter for NES6D.
  *
- * Keeps the small NES550D ML shell (menu, ROM list, display, input and audio)
+ * Keeps the small NES6D ML shell (menu, ROM list, display, input and audio)
  * but replaces its experimental CPU/PPU/APU with QuickNES (GPL-2.0).
  */
 
@@ -135,9 +135,9 @@ static void qnes_audio_clear(void)
     g_audio_read = 0;
 }
 
-extern "C" int nes550d_core_init(const uint8_t *rom_data,
+extern "C" int nes6d_core_init(const uint8_t *rom_data,
                                  unsigned int rom_size,
-                                 const struct nes550d_core_options *options)
+                                 const struct nes6d_core_options *options)
 {
     const char *err;
     (void)options;
@@ -189,14 +189,14 @@ extern "C" int nes550d_core_init(const uint8_t *rom_data,
     return 0;
 }
 
-extern "C" void nes550d_core_set_button(enum nes550d_button button,
+extern "C" void nes6d_core_set_button(enum nes6d_button button,
                                         int pressed)
 {
-    static const unsigned bits[NES550D_BUTTON_COUNT] =
+    static const unsigned bits[NES6D_BUTTON_COUNT] =
     {
         0x10, 0x20, 0x40, 0x80, 0x01, 0x02, 0x04, 0x08
     };
-    if (button >= NES550D_BUTTON_COUNT)
+    if (button >= NES6D_BUTTON_COUNT)
         return;
     if (pressed)
         g_pad |= bits[button];
@@ -204,7 +204,7 @@ extern "C" void nes550d_core_set_button(enum nes550d_button button,
         g_pad &= ~bits[button];
 }
 
-extern "C" void nes550d_core_run_cpu_frame(void)
+extern "C" void nes6d_core_run_cpu_frame(void)
 {
     const char *err;
     long count;
@@ -225,13 +225,13 @@ extern "C" void nes550d_core_run_cpu_frame(void)
     g_latch_count += (unsigned)g_emu->frame().joypad_read_count;
 }
 
-extern "C" void nes550d_core_run_frame(void)
+extern "C" void nes6d_core_run_frame(void)
 {
-    nes550d_core_run_cpu_frame();
-    nes550d_core_render_frame();
+    nes6d_core_run_cpu_frame();
+    nes6d_core_render_frame();
 }
 
-extern "C" void nes550d_core_render_frame(void)
+extern "C" void nes6d_core_render_frame(void)
 {
     const Nes_Emu::frame_t &f = g_emu->frame();
     uint8_t palette_map[256];
@@ -241,7 +241,7 @@ extern "C" void nes550d_core_render_frame(void)
         return;
 
     /* QuickNES pixels index frame.palette[], which holds the NES color
-     * number; NES550D's palette is indexed by that number.  Build a small
+     * number; NES6D's palette is indexed by that number.  Build a small
      * byte map once instead of doing the lookup for every pixel. */
     for (i = 0; i < 256; i++)
         palette_map[i] = i < f.palette_size
@@ -264,12 +264,12 @@ extern "C" void nes550d_core_render_frame(void)
     }
 }
 
-extern "C" const uint8_t *nes550d_core_framebuffer(void)
+extern "C" const uint8_t *nes6d_core_framebuffer(void)
 {
     return g_framebuffer;
 }
 
-extern "C" void nes550d_core_render_audio(int16_t *samples,
+extern "C" void nes6d_core_render_audio(int16_t *samples,
                                           unsigned int count)
 {
     unsigned int i;
@@ -287,32 +287,32 @@ extern "C" void nes550d_core_render_audio(int16_t *samples,
     }
 }
 
-extern "C" const char *nes550d_core_error(void)
+extern "C" const char *nes6d_core_error(void)
 {
     return g_error;
 }
 
-extern "C" unsigned int nes550d_core_controller_reads(void)
+extern "C" unsigned int nes6d_core_controller_reads(void)
 {
     return (unsigned int)g_emu->frame().joypad_read_count;
 }
 
-extern "C" unsigned int nes550d_core_controller_latches(void)
+extern "C" unsigned int nes6d_core_controller_latches(void)
 {
     return g_latch_count;
 }
 
-extern "C" unsigned int nes550d_core_last_latched_buttons(void)
+extern "C" unsigned int nes6d_core_last_latched_buttons(void)
 {
     return g_pad;
 }
 
-extern "C" unsigned int nes550d_core_observed_buttons(void)
+extern "C" unsigned int nes6d_core_observed_buttons(void)
 {
     return g_pad;
 }
 
-extern "C" unsigned int nes550d_core_state_checksum(void)
+extern "C" unsigned int nes6d_core_state_checksum(void)
 {
     const uint8_t *p = g_emu->low_mem();
     unsigned int i, sum = 0;
@@ -321,89 +321,89 @@ extern "C" unsigned int nes550d_core_state_checksum(void)
     return sum;
 }
 
-extern "C" unsigned int nes550d_core_debug_ram(unsigned int address)
+extern "C" unsigned int nes6d_core_debug_ram(unsigned int address)
 {
     return g_emu->low_mem()[address & 0x7ff];
 }
 
-extern "C" unsigned int nes550d_core_debug_pc(void)
+extern "C" unsigned int nes6d_core_debug_pc(void)
 {
     return 0;
 }
 
-extern "C" unsigned int nes550d_core_debug_start_checks(void)
+extern "C" unsigned int nes6d_core_debug_start_checks(void)
 {
     return 0;
 }
 
-extern "C" unsigned int nes550d_core_debug_return_address(void)
+extern "C" unsigned int nes6d_core_debug_return_address(void)
 {
     return 0;
 }
 
-extern "C" unsigned int nes550d_core_debug_outer_return_address(void)
+extern "C" unsigned int nes6d_core_debug_outer_return_address(void)
 {
     return 0;
 }
 
-extern "C" unsigned int nes550d_core_debug_ppu_ctrl(void)
+extern "C" unsigned int nes6d_core_debug_ppu_ctrl(void)
 {
     return 0;
 }
 
-extern "C" unsigned int nes550d_core_debug_ppu_mask(void)
+extern "C" unsigned int nes6d_core_debug_ppu_mask(void)
 {
-    /* QuickNES does not expose PPU_MASK; 0x18 keeps NES550D's display
+    /* QuickNES does not expose PPU_MASK; 0x18 keeps NES6D's display
      * scheduler from treating the PPU as disabled. */
     return 0x18;
 }
 
-extern "C" unsigned int nes550d_core_debug_ppu_dirty(void)
+extern "C" unsigned int nes6d_core_debug_ppu_dirty(void)
 {
     return 0;
 }
 
-extern "C" unsigned int nes550d_core_debug_ppu_scroll(void)
+extern "C" unsigned int nes6d_core_debug_ppu_scroll(void)
 {
     return 0;
 }
 
-extern "C" unsigned int nes550d_core_debug_frame_scroll(void)
+extern "C" unsigned int nes6d_core_debug_frame_scroll(void)
 {
     return 0;
 }
 
-extern "C" unsigned int nes550d_core_debug_mmc3_split(void)
+extern "C" unsigned int nes6d_core_debug_mmc3_split(void)
 {
     return 0;
 }
 
-extern "C" unsigned int nes550d_core_debug_dmc_control(void)
+extern "C" unsigned int nes6d_core_debug_dmc_control(void)
 {
     return 0;
 }
 
-extern "C" unsigned int nes550d_core_debug_dmc_address(void)
+extern "C" unsigned int nes6d_core_debug_dmc_address(void)
 {
     return 0;
 }
 
-extern "C" unsigned int nes550d_core_debug_dmc_length(void)
+extern "C" unsigned int nes6d_core_debug_dmc_length(void)
 {
     return 0;
 }
 
-extern "C" unsigned int nes550d_core_debug_dmc_remaining(void)
+extern "C" unsigned int nes6d_core_debug_dmc_remaining(void)
 {
     return 0;
 }
 
-extern "C" unsigned int nes550d_core_debug_dmc_output(void)
+extern "C" unsigned int nes6d_core_debug_dmc_output(void)
 {
     return 0;
 }
 
-extern "C" void nes550d_core_reset(void)
+extern "C" void nes6d_core_reset(void)
 {
     if (g_emu)
         g_emu->reset(false);
@@ -412,7 +412,7 @@ extern "C" void nes550d_core_reset(void)
     qnes_audio_clear();
 }
 
-extern "C" void nes550d_core_shutdown(void)
+extern "C" void nes6d_core_shutdown(void)
 {
     if (g_emu)
     {
@@ -424,3 +424,4 @@ extern "C" void nes550d_core_shutdown(void)
     g_error = 0;
     qnes_audio_clear();
 }
+

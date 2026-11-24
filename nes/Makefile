@@ -5,7 +5,7 @@ QNES_SRC = $(wildcard $(QNES_DIR)/*.cpp)
 QNES_OBJS = $(patsubst $(QNES_DIR)/%.cpp,$(BUILD_DIR)/qnes/%.o,$(QNES_SRC))
 
 MODULE_OBJS = \
-    $(BUILD_DIR)/nes550d.o \
+    $(BUILD_DIR)/nes6d.o \
     $(BUILD_DIR)/nes_core_qnes.o \
     $(BUILD_DIR)/nes_audio_ml.o \
     $(BUILD_DIR)/nes_rom.o \
@@ -39,7 +39,7 @@ $(BUILD_DIR)/nes_core_qnes.o: nes_core_qnes.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(CFLAGS) $(CXXFLAGS_QNES) -c -o $@ $<
 
 # The interpreter and tile renderer are the camera's measured hot path.
-$(BUILD_DIR)/nes550d.o: CFLAGS += -O3
+$(BUILD_DIR)/nes6d.o: CFLAGS += -O3
 
 # QuickNES' Blip_Buffer equalizer needs libm; link it into the relocatable
 # module (the camera .sym does not export cos/exp/pow).
@@ -49,3 +49,4 @@ $(BUILD_DIR)/$(MODULE_NAME).mo: $(MODULE_OBJS)
 	$(MV) $@.tmp $@
 
 .DEFAULT_GOAL := $(BUILD_DIR)/module_complete
+
